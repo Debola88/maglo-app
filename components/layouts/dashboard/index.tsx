@@ -1,3 +1,4 @@
+"use client"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "./app-sidebar";
 import { SiteHeader } from "./site-header";
@@ -8,7 +9,7 @@ interface Props {
 
 const DashboardLayoutWrapper: React.FC<Props> = ({ children }) => {
   return (
-    <main className="w-full flex lg:h-screen overflow-hidden">
+    <main className="w-full overflow-hidden">
       <SidebarProvider
         style={
           {
@@ -22,7 +23,7 @@ const DashboardLayoutWrapper: React.FC<Props> = ({ children }) => {
           <SiteHeader />
           <div className="flex flex-1 flex-col">
             <div className="@container/main flex flex-1 flex-col gap-2">
-              <div className="flex flex-col gap-4 py-4">{children}</div>
+              <div className="flex flex-col gap-4 py-4 lg:px-6">{children}</div>
             </div>
           </div>
         </SidebarInset>
