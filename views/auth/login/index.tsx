@@ -31,29 +31,23 @@ export default function LoginView() {
     setLoading(true);
 
     try {
-      // Delete any existing session first
       try {
         await account.deleteSession('current');
       } catch (error) {
-        // No active session, that's fine
       }
 
-      // Create new session with Appwrite
       const session = await account.createEmailPasswordSession(email, password);
       
       console.log('Session created:', session);
       
-      // Get user details
       const user = await account.get();
       
       console.log('User logged in:', user);
       
-      // Refresh the auth context
       await refreshUser();
       
       toast.success("Login successful!");
       
-      // Small delay to ensure auth context updates
       setTimeout(() => {
         router.push("/dashboard");
         router.refresh();
@@ -64,7 +58,6 @@ export default function LoginView() {
       
       let errorMessage = "Something went wrong";
       
-      // Handle specific Appwrite errors
       if (error.code === 401) {
         errorMessage = "Invalid email or password";
       } else if (error.code === 429) {

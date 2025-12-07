@@ -13,7 +13,6 @@ import {
   IconSettings,
   IconUsers,
 } from "@tabler/icons-react";
-
 import { NavMain } from "@/components/layouts/dashboard/nav-main";
 import { NavUser } from "@/components/layouts/dashboard/nav-user";
 import {
@@ -27,6 +26,7 @@ import {
 } from "@/components/ui/sidebar";
 import logo from "@/assets/image/Logo.svg";
 import Image from "next/image";
+import { APP_LINKS } from "@/constants/app-links";
 
 const data = {
   user: {
@@ -37,28 +37,13 @@ const data = {
   navMain: [
     {
       title: "Dashboard",
-      url: "#",
+      url: APP_LINKS.DASHBOARD_OVERVIEW,
       icon: IconDashboard,
     },
     {
-      title: "Lifecycle",
-      url: "#",
+      title: "Invoices",
+      url: APP_LINKS.INVOICE_MANAGEMENT,
       icon: IconListDetails,
-    },
-    {
-      title: "Analytics",
-      url: "#",
-      icon: IconChartBar,
-    },
-    {
-      title: "Projects",
-      url: "#",
-      icon: IconFolder,
-    },
-    {
-      title: "Team",
-      url: "#",
-      icon: IconUsers,
     },
   ],
   navClouds: [

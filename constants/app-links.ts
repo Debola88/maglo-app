@@ -3,7 +3,7 @@ export enum APP_LINKS {
 
   // Dashboard
   DASHBOARD_OVERVIEW = "/dashboard",
-  INVOICE_MANAGEMENT = "/dashboard/favorite",
+  INVOICE_MANAGEMENT = "/invoices",
   DASHBOARD_TRASH = "/dashboard/trash",
   SIGNUP_HOME = "/signup",
 
