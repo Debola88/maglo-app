@@ -14,7 +14,6 @@ export interface LoginData {
 }
 
 export class AuthService {
-  // Sign Up
   async signUp({ username, email, password }: SignUpData) {
     try {
       const user = await account.create(
@@ -24,7 +23,6 @@ export class AuthService {
         username
       );
       
-      // After creating account, log the user in
       await this.login({ email, password });
       
       return { user, error: null };
@@ -37,7 +35,6 @@ export class AuthService {
     }
   }
 
-  // Login
   async login({ email, password }: LoginData) {
     try {
       const session = await account.createEmailPasswordSession(email, password);
@@ -51,7 +48,6 @@ export class AuthService {
     }
   }
 
-  // Logout
   async logout() {
     try {
       await account.deleteSession('current');
@@ -62,7 +58,6 @@ export class AuthService {
     }
   }
 
-  // Get Current User
   async getCurrentUser() {
     try {
       const user = await account.get();
@@ -72,7 +67,6 @@ export class AuthService {
     }
   }
 
-  // Check if user is authenticated
   async isAuthenticated() {
     try {
       await account.get();

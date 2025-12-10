@@ -1,7 +1,6 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import Image, { StaticImageData } from "next/image";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -11,7 +10,8 @@ import {
 import { MoreVertical, Edit, Trash2 } from "lucide-react";
 
 export type Invoice = {
-  id: string;
+  $id: string;
+  id?: string;
   clientName: string;
   clientEmail: string;
   amount: number;
@@ -23,19 +23,24 @@ export type Invoice = {
   createdAt?: string | Date;
 };
 
+interface ColumnMeta {
+  onEdit?: (invoice: Invoice) => void;
+  onDelete?: (invoice: Invoice) => void;
+}
+
 export const columns: ColumnDef<Invoice>[] = [
-  {
-    accessorKey: "id",
-    header: "Invoice ID",
-    cell: ({ row }) => (
-      <div className="font-medium">
-        {row.original.id}
-      </div>
-    ),
-  },
   {
     accessorKey: "clientName",
     header: "Client Name",
+    filterFn: (row, id, value) => {
+      const clientName = row.getValue(id) as string;
+      const clientEmail = row.original.clientEmail || "";
+      const searchValue = value.toLowerCase();
+      return (
+        clientName.toLowerCase().includes(searchValue) ||
+        clientEmail.toLowerCase().includes(searchValue)
+      );
+    },
     cell: ({ row }) => {
       const clientName = row.original.clientName || "Unknown";
       const clientEmail = row.original.clientEmail || "";
@@ -134,6 +139,9 @@ export const columns: ColumnDef<Invoice>[] = [
   {
     accessorKey: "status",
     header: "Status",
+    filterFn: (row, id, value) => {
+      return row.getValue(id) === value;
+    },
     cell: ({ row }) => {
       const status = row.original.status;
       return (
@@ -152,52 +160,47 @@ export const columns: ColumnDef<Invoice>[] = [
   {
     id: "actions",
     header: "Actions",
-    cell: ({ row }) => (
-      <div className="flex items-center gap-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => console.log("View", row.original.id)}
-          className="text-blue-600 hover:text-blue-800 hover:bg-blue-50 h-8 px-3"
-        >
-          View
-        </Button>
-
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0 hover:bg-gray-100"
-            >
-              <MoreVertical className="h-4 w-4" />
-              <span className="sr-only">Open menu</span>
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-40 p-2" align="end">
-            <div className="flex flex-col gap-1">
+    cell: ({ row, table }) => {
+      const meta = table.options.meta as ColumnMeta | undefined;
+      
+      return (
+        <div className="flex items-center gap-2">
+          <Popover>
+            <PopoverTrigger asChild>
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => console.log("Edit", row.original.id)}
-                className="w-full justify-start text-sm font-normal hover:bg-gray-100"
+                className="h-8 w-8 p-0 hover:bg-gray-100"
               >
-                <Edit className="mr-2 h-4 w-4" />
-                Edit
+                <MoreVertical className="h-4 w-4" />
+                <span className="sr-only">Open menu</span>
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => console.log("Delete", row.original.id)}
-                className="w-full justify-start text-sm font-normal text-red-600 hover:text-red-700 hover:bg-red-50"
-              >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
-              </Button>
-            </div>
-          </PopoverContent>
-        </Popover>
-      </div>
-    ),
+            </PopoverTrigger>
+            <PopoverContent className="w-40 p-2" align="end">
+              <div className="flex flex-col gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => meta?.onEdit?.(row.original)}
+                  className="w-full justify-start text-sm font-normal hover:bg-gray-100"
+                >
+                  <Edit className="mr-2 h-4 w-4" />
+                  Edit
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => meta?.onDelete?.(row.original)}
+                  className="w-full justify-start text-sm font-normal text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+      );
+    },
   },
 ];

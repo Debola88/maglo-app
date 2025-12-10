@@ -31,8 +31,8 @@ export type Invoice = {
     email?: string;
   };
   items: InvoiceItem[];
-  discount?: number; // as currency absolute
-  tax?: number; // absolute
+  discount?: number;
+  tax?: number; 
   notes?: string;
   status?: "Paid" | "Unpaid";
   createdAt?: string | Date;

@@ -7,14 +7,21 @@ import { IoWallet } from "react-icons/io5";
 import { GiWallet } from "react-icons/gi";
 import { MdWallet } from "react-icons/md";
 import React, { useState, useEffect, useMemo } from "react";
+import { useAuth } from "@/context/auth-context";
+import { invoiceService } from "@/lib/services/invoice.service";
+import { toast } from "sonner";
 
 interface Invoice {
-  id: number;
+  $id: string;
+  clientName: string;
+  clientEmail: string;
   amount: number;
-  status: "Paid" | "Pending";
-  date: string;
-  vat?: number;
-  [key: string]: any;
+  vat: number;
+  vatAmount: number;
+  total: number;
+  dueDate: string | Date;
+  status: "Paid" | "Unpaid";
+  createdAt?: string | Date;
 }
 
 interface Stats {
@@ -25,72 +32,79 @@ interface Stats {
 }
 
 export default function DashboardView() {
+  const { user } = useAuth();
   const [data, setData] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Calculate stats from real invoice data
   const stats = useMemo<Stats>(() => {
-    if (!data || !Array.isArray(data) || data.length === 0) {
+    if (!data || data.length === 0) {
       return {
-        totalInvoice: 5240.21,
-        amountPaid: 250.80,
-        pendingPayment: 550.25,
-        totalVAT: 391.52,
+        totalInvoice: 0,
+        amountPaid: 0,
+        pendingPayment: 0,
+        totalVAT: 0,
       };
     }
 
-    const hasAmountField = 'amount' in data[0];
-    if (!hasAmountField) {
-      return {
-        totalInvoice: 5240.21,
-        amountPaid: 250.80,
-        pendingPayment: 550.25,
-        totalVAT: 391.52,
-      };
-    }
+    // Total of all invoices
+    const totalInvoice = data.reduce((sum, invoice) => sum + (invoice.total || 0), 0);
 
-    const total = data.reduce((sum: number, invoice) => sum + (invoice.amount || 0), 0);
-    const paid = data
+    // Sum of paid invoices
+    const amountPaid = data
       .filter((invoice) => invoice.status === "Paid")
-      .reduce((sum: number, invoice) => sum + (invoice.amount || 0), 0);
-    const pending = data
-      .filter((invoice) => invoice.status === "Pending")
-      .reduce((sum: number, invoice) => sum + (invoice.amount || 0), 0);
-    const vat = data.reduce((sum: number, invoice) => sum + ((invoice.amount || 0) * 0.075), 0);
+      .reduce((sum, invoice) => sum + (invoice.total || 0), 0);
+
+    // Sum of unpaid invoices
+    const pendingPayment = data
+      .filter((invoice) => invoice.status === "Unpaid")
+      .reduce((sum, invoice) => sum + (invoice.total || 0), 0);
+
+    // Sum of VAT from paid invoices only
+    const totalVAT = data
+      .filter((invoice) => invoice.status === "Paid")
+      .reduce((sum, invoice) => sum + (invoice.vatAmount || 0), 0);
 
     return {
-      totalInvoice: total,
-      amountPaid: paid,
-      pendingPayment: pending,
-      totalVAT: vat,
+      totalInvoice,
+      amountPaid,
+      pendingPayment,
+      totalVAT,
     };
   }, [data]);
 
-  const getData = async (): Promise<void> => {
+  // Fetch invoices from Appwrite
+  const fetchInvoices = async () => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
     try {
-      setLoading(true);
-      const res = await fetch("/api/data");
-      const fetchedData = await res.json();
-      
-      if (fetchedData && Array.isArray(fetchedData)) {
-        setData(fetchedData);
+      const { data: invoices, error } = await invoiceService.getUserInvoices(
+        user.$id
+      );
+
+      if (error) {
+        toast.error(error);
+        return;
+      }
+
+      if (invoices) {
+        setData(invoices as any);
       }
     } catch (error) {
-      console.error("Error fetching data:", error);
-      setData([
-        { id: 1, amount: 1500, status: "Paid", date: "2024-04-01" },
-        { id: 2, amount: 2200, status: "Pending", date: "2024-04-02" },
-        { id: 3, amount: 1800, status: "Paid", date: "2024-04-03" },
-        { id: 4, amount: 3200, status: "Paid", date: "2024-04-04" },
-        { id: 5, amount: 2700, status: "Pending", date: "2024-04-05" },
-      ]);
+      console.error("Error fetching invoices:", error);
+      toast.error("Failed to load invoices");
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    getData();
-  }, []);
+    fetchInvoices();
+  }, [user]);
 
   const cardInfo = [
     {
@@ -100,25 +114,41 @@ export default function DashboardView() {
       iconColor: "bg-[#4E5257] text-[#C8EE44]",
       bgColor: "bg-[#363A3F]",
       textColor: "text-white",
-      formatFigure: (value: number | string) => Number(value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+      formatFigure: (value: number | string) => 
+        Number(value).toLocaleString(undefined, { 
+          minimumFractionDigits: 2, 
+          maximumFractionDigits: 2 
+        }),
     },
     {
       title: "Amount Paid",
       figure: stats.amountPaid,
       icon: <GiWallet />,
-      formatFigure: (value: number | string) => Number(value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+      formatFigure: (value: number | string) => 
+        Number(value).toLocaleString(undefined, { 
+          minimumFractionDigits: 2, 
+          maximumFractionDigits: 2 
+        }),
     },
     {
       title: "Pending Payment",
       figure: stats.pendingPayment,
       icon: <MdWallet />,
-      formatFigure: (value: number | string) => Number(value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+      formatFigure: (value: number | string) => 
+        Number(value).toLocaleString(undefined, { 
+          minimumFractionDigits: 2, 
+          maximumFractionDigits: 2 
+        }),
     },
     {
       title: "Total VAT",
       figure: stats.totalVAT,
       icon: <MdWallet />,
-      formatFigure: (value: number | string) => Number(value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+      formatFigure: (value: number | string) => 
+        Number(value).toLocaleString(undefined, { 
+          minimumFractionDigits: 2, 
+          maximumFractionDigits: 2 
+        }),
     },
   ];
 
@@ -151,7 +181,7 @@ export default function DashboardView() {
         <ChartAreaInteractive />
       </div>
       <div className="mt-6">
-        <DataTable data={data} />
+        <DataTable data={data as any} />
       </div>
     </React.Fragment>
   );

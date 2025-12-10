@@ -1,7 +1,3 @@
-// ============================================
-// FILE 4: data-table.tsx
-// PATH: views/invoices/_components/data-table.tsx
-// ============================================
 "use client";
 
 import {
@@ -20,26 +16,42 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { Invoice } from "./table-columns";
+import { useState, useEffect } from "react";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   columnFilters?: ColumnFiltersState;
+  onEdit?: (invoice: Invoice) => void;
+  onDelete?: (invoice: Invoice) => void;
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   columnFilters = [],
+  onEdit,
+  onDelete,
 }: DataTableProps<TData, TValue>) {
+  const [internalFilters, setInternalFilters] = useState<ColumnFiltersState>(columnFilters);
+
+  useEffect(() => {
+    setInternalFilters(columnFilters);
+  }, [columnFilters]);
+
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    onColumnFiltersChange: setInternalFilters,
     state: {
-      columnFilters,
+      columnFilters: internalFilters,
+    },
+    meta: {
+      onEdit,
+      onDelete,
     },
   });
 

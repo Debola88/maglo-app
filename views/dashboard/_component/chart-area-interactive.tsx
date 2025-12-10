@@ -28,18 +28,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Generate realistic income and expenses data with dynamic dates
 const generateChartData = () => {
   const data = [];
   const today = new Date();
   const startDate = new Date(today);
-  startDate.setDate(startDate.getDate() - 90); // Start from 90 days ago
+  startDate.setDate(startDate.getDate() - 90); 
   
   for (let i = 0; i < 90; i++) {
     const date = new Date(startDate);
     date.setDate(date.getDate() + i);
     
-    // Generate realistic values that fluctuate
     const baseIncome = 5000;
     const baseExpenses = 4500;
     const variance = 2000;
@@ -57,17 +55,16 @@ const generateChartData = () => {
   return data;
 };
 
-// Generate chart data once when component loads
 const chartData = generateChartData();
 
 const chartConfig = {
   income: {
     label: "Income",
-    color: "#14b8a6", // teal-500
+    color: "#14b8a6",
   },
   expenses: {
     label: "Expenses",
-    color: "#a3e635", // lime-400
+    color: "#a3e635",
   },
 } satisfies ChartConfig;
 
@@ -83,7 +80,7 @@ export function ChartAreaInteractive() {
 
   const filteredData = chartData.filter((item) => {
     const date = new Date(item.date);
-    const referenceDate = new Date(); // Use today's date
+    const referenceDate = new Date();
     let daysToSubtract = 90;
     if (timeRange === "30d") {
       daysToSubtract = 30;

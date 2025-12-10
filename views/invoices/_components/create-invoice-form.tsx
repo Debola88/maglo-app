@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,24 +32,50 @@ interface InvoiceSubmissionData {
   status: "Paid" | "Unpaid";
 }
 
+interface Invoice {
+  $id?: string;
+  clientName: string;
+  clientEmail: string;
+  amount: number;
+  vat: number;
+  vatAmount: number;
+  total: number;
+  dueDate: string | Date;
+  status: "Paid" | "Unpaid";
+}
+
 interface CreateInvoiceFormProps {
   onSubmit: (values: InvoiceSubmissionData) => void;
   onCancel: () => void;
   isLoading?: boolean;
+  initialData?: Invoice;
 }
 
 export function CreateInvoiceForm({
   onSubmit,
   onCancel,
   isLoading = false,
+  initialData,
 }: CreateInvoiceFormProps) {
-  const [formData, setFormData] = useState({
-    clientName: "",
-    clientEmail: "",
-    amount: "",
-    vat: "7.5",
-    dueDate: undefined as Date | undefined,
-    status: "Unpaid" as "Paid" | "Unpaid",
+  const [formData, setFormData] = useState(() => {
+    if (initialData) {
+      return {
+        clientName: initialData.clientName,
+        clientEmail: initialData.clientEmail,
+        amount: initialData.amount.toString(),
+        vat: initialData.vat.toString(),
+        dueDate: new Date(initialData.dueDate),
+        status: initialData.status,
+      };
+    }
+    return {
+      clientName: "",
+      clientEmail: "",
+      amount: "",
+      vat: "7.5",
+      dueDate: undefined as Date | undefined,
+      status: "Unpaid" as "Paid" | "Unpaid",
+    };
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -117,6 +143,8 @@ export function CreateInvoiceForm({
 
     onSubmit(submissionData);
   };
+
+  const isEditMode = !!initialData;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -316,7 +344,10 @@ export function CreateInvoiceForm({
           className="bg-[#C8EE44] text-[#1B212D] hover:bg-[#b8de3c]"
           disabled={isLoading}
         >
-          {isLoading ? "Creating..." : "Create Invoice"}
+          {isLoading 
+            ? (isEditMode ? "Updating..." : "Creating...") 
+            : (isEditMode ? "Update Invoice" : "Create Invoice")
+          }
         </Button>
       </div>
     </form>
