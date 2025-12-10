@@ -180,9 +180,9 @@ export default function DashboardView() {
       <div className="mt-6">
         <ChartAreaInteractive />
       </div>
-      <div className="mt-6">
+      {/* <div className="mt-6">
         <DataTable data={data as any} />
-      </div>
+      </div> */}
     </React.Fragment>
   );
 }

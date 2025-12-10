@@ -33,7 +33,16 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { invoiceService } from "@/lib/services/invoice.service";
 import { useAuth } from "@/context/auth-context";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function DashboardInvoiceView() {
   const { user } = useAuth();
@@ -45,11 +54,11 @@ export default function DashboardInvoiceView() {
   const [isCreating, setIsCreating] = useState(false);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
-  
+
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deletingInvoice, setDeletingInvoice] = useState<Invoice | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -62,18 +71,18 @@ export default function DashboardInvoiceView() {
 
   useEffect(() => {
     const filters: ColumnFiltersState = [];
-    
+
     if (searchQuery) {
       filters.push({ id: "clientName", value: searchQuery });
     }
-    
+
     if (statusFilter !== "all") {
       filters.push({
         id: "status",
         value: statusFilter === "paid" ? "Paid" : "Unpaid",
       });
     }
-    
+
     setColumnFilters(filters);
   }, [searchQuery, statusFilter]);
 
@@ -152,10 +161,8 @@ export default function DashboardInvoiceView() {
 
     setIsUpdating(true);
     try {
-      const { data: updatedInvoice, error } = await invoiceService.updateInvoice(
-        editingInvoice.$id,
-        values
-      );
+      const { data: updatedInvoice, error } =
+        await invoiceService.updateInvoice(editingInvoice.$id, values);
 
       if (error) {
         toast.error(error);
@@ -163,9 +170,11 @@ export default function DashboardInvoiceView() {
       }
 
       if (updatedInvoice) {
-        setData(data.map(inv => 
-          inv.$id === editingInvoice.$id ? updatedInvoice as any : inv
-        ));
+        setData(
+          data.map((inv) =>
+            inv.$id === editingInvoice.$id ? (updatedInvoice as any) : inv
+          )
+        );
         setIsEditDialogOpen(false);
         setEditingInvoice(null);
         toast.success("Invoice updated successfully!");
@@ -195,7 +204,7 @@ export default function DashboardInvoiceView() {
         return;
       }
 
-      setData(data.filter(inv => inv.$id !== deletingInvoice.$id));
+      setData(data.filter((inv) => inv.$id !== deletingInvoice.$id));
       setIsDeleteDialogOpen(false);
       setDeletingInvoice(null);
       toast.success("Invoice deleted successfully!");
@@ -219,8 +228,8 @@ export default function DashboardInvoiceView() {
     <React.Fragment>
       <div className="flex justify-between px-4 lg:px-6 mb-4">
         <InputGroup className="rounded-lg max-w-max bg-[#F8F8F8]">
-          <InputGroupInput 
-            placeholder="Search invoices" 
+          <InputGroupInput
+            placeholder="Search invoices"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -229,6 +238,38 @@ export default function DashboardInvoiceView() {
           </InputGroupAddon>
         </InputGroup>
         <div className="flex items-center gap-3">
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="bg-[#C8EE44] text-[#1B212D] p-4 text-sm hover:bg-[#b8de3c]">
+                <Image
+                  src={buttonIcon}
+                  alt=""
+                  width={16}
+                  height={16}
+                  className="mr-2"
+                />
+                Create Invoice
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle className="text-xl font-semibold">
+                  Create New Invoice
+                </DialogTitle>
+                <DialogDescription className="text-muted-foreground">
+                  Fill in the details below to create a new invoice. All fields
+                  are required.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="mt-4">
+                <CreateInvoiceForm
+                  onSubmit={handleCreateInvoice}
+                  onCancel={() => setIsDialogOpen(false)}
+                  isLoading={isCreating}
+                />
+              </div>
+            </DialogContent>
+          </Dialog>
           <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
             <PopoverTrigger asChild>
               <Button
@@ -285,39 +326,6 @@ export default function DashboardInvoiceView() {
               </div>
             </PopoverContent>
           </Popover>
-
-          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-            <DialogTrigger asChild>
-              <Button className="bg-[#C8EE44] text-[#1B212D] p-4 text-sm hover:bg-[#b8de3c]">
-                <Image
-                  src={buttonIcon}
-                  alt=""
-                  width={16}
-                  height={16}
-                  className="mr-2"
-                />
-                Create Invoice
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle className="text-xl font-semibold">
-                  Create New Invoice
-                </DialogTitle>
-                <DialogDescription className="text-muted-foreground">
-                  Fill in the details below to create a new invoice. All fields
-                  are required.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="mt-4">
-                <CreateInvoiceForm
-                  onSubmit={handleCreateInvoice}
-                  onCancel={() => setIsDialogOpen(false)}
-                  isLoading={isCreating}
-                />
-              </div>
-            </DialogContent>
-          </Dialog>
         </div>
       </div>
 
@@ -347,14 +355,19 @@ export default function DashboardInvoiceView() {
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This will permanently delete the invoice for{" "}
-              <span className="font-semibold">{deletingInvoice?.clientName}</span>.
-              This action cannot be undone.
+              <span className="font-semibold">
+                {deletingInvoice?.clientName}
+              </span>
+              . This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -370,9 +383,9 @@ export default function DashboardInvoiceView() {
         </AlertDialogContent>
       </AlertDialog>
 
-      <DataTable 
-        data={data} 
-        columns={columns} 
+      <DataTable
+        data={data}
+        columns={columns}
         columnFilters={columnFilters}
         onEdit={handleEditInvoice}
         onDelete={handleDeleteClick}
