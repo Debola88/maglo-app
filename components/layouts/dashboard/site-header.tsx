@@ -5,7 +5,7 @@ import { useAuth } from "@/context/auth-context";
 import { IoNotifications } from "react-icons/io5";
 
 export function SiteHeader() {
-  const { user, lot } = useAuth();
+  const { user } = useAuth();
   const userName = user?.name || "Guest";
   const userInitial = userName.charAt(0).toUpperCase();
 

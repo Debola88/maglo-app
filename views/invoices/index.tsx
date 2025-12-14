@@ -79,7 +79,7 @@ export default function DashboardInvoiceView() {
     if (statusFilter !== "all") {
       filters.push({
         id: "status",
-        value: statusFilter === "paid" ? "Paid" : "Unpaid",
+        value: statusFilter === "Paid" ? "Paid" : "Unpaid",
       });
     }
 
@@ -281,12 +281,12 @@ export default function DashboardInvoiceView() {
                 {statusFilter !== "all" && (
                   <span
                     className={`ml-2 px-2 py-0.5 rounded-full text-xs font-medium ${
-                      statusFilter === "paid"
+                      statusFilter === "Paid"
                         ? "bg-green-100 text-green-800"
                         : "bg-orange-100 text-orange-800"
                     }`}
                   >
-                    {statusFilter === "paid" ? "Paid" : "Unpaid"}
+                    {statusFilter === "Paid" ? "Paid" : "Unpaid"}
                   </span>
                 )}
               </Button>
@@ -307,9 +307,9 @@ export default function DashboardInvoiceView() {
                   variant="ghost"
                   className={cn(
                     "w-full justify-start text-sm font-normal",
-                    statusFilter === "paid" && "bg-[#C8EE44]/20 font-medium"
+                    statusFilter === "Paid" && "bg-[#C8EE44]/20 font-medium"
                   )}
-                  onClick={() => handleStatusFilterChange("paid")}
+                  onClick={() => handleStatusFilterChange("Paid")}
                 >
                   Paid
                 </Button>
@@ -317,9 +317,9 @@ export default function DashboardInvoiceView() {
                   variant="ghost"
                   className={cn(
                     "w-full justify-start text-sm font-normal",
-                    statusFilter === "unpaid" && "bg-[#C8EE44]/20 font-medium"
+                    statusFilter === "Unpaid" && "bg-[#C8EE44]/20 font-medium"
                   )}
-                  onClick={() => handleStatusFilterChange("unpaid")}
+                  onClick={() => handleStatusFilterChange("Unpaid")}
                 >
                   Unpaid
                 </Button>
