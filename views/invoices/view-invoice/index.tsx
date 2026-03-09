@@ -9,10 +9,10 @@ type InvoiceItem = {
   id: string;
   name: string;
   description?: string;
-  orderType?: string; // e.g. "01"
-  rate: number; // currency number
-  quantity?: number; // default 1
-  amount?: number; // optional precomputed
+  orderType?: string;
+  rate: number; 
+  quantity?: number; 
+  amount?: number;
 };
 
 export type Invoice = {
