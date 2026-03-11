@@ -1,6 +1,6 @@
 import SignUpView from "@/views/auth/signup";
 
 
-export default function LoginPage() {
+export default function SignupPage() {
   return <SignUpView />;
 }
